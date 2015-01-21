@@ -7,10 +7,11 @@
     "mongoose": "latest",
     "ejs":      "latest",
     "request":  "latest",
-    "express":  "latest",
+    "express":  "~3.4.0",
     "config":   "latest",
     "async":    "latest",
-    "cron":     "latest"
+    "cron":     "latest",
+    "loggly": "latest"
   },
   "keywords": ["cron", "service"],
   "repository": "https://github.com/fzaninotto/cron-as-a-service",

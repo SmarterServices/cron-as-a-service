@@ -3,7 +3,6 @@
  */
 var express    = require('express');
 var app = module.exports = express.createServer();
-
 var Job = require('../../models/job');
 var CronTab = require('../../lib/cronTab');
 
@@ -22,14 +21,19 @@ app.get('/jobs', function(req, res, next) {
 });
 
 app.post('/jobs', function(req, res, next) {
-  if (!req.body.expression || !req.body.url) return next(new Error('You must provide an expression and an url as POST parameters'), 403);
+  if (!req.body.expression || !req.body.url || !req.body.name) return next(new Error('You must provide an expression, url, and name as POST parameters'), 403);
   var job = new Job();
   job.expression = req.body.expression;
   job.url = req.body.url;
+  job.name = (req.body.name) ? req.body.name : null;
+  job.details = (req.body.details) ? req.body.details : null;
+  job.service_name = (req.body.service_name) ? req.body.service_name : null;
+  job.customer_id = (req.body.customer_id) ? req.body.customer_id : null;
+
   job.save(function(err) {
     if (err) return next(err);
     if (CronTab.add(job)) {
-      res.redirect('/jobs/' + job._id);
+      res.redirect('jobs/' + job._id);
     } else {
       return next(new Error('Error adding Job'));
     }
@@ -52,7 +56,7 @@ app.put('/jobs/:id', function(req, res, next) {
     job.save(function(err2) {
       if (err2) return next(err2);
       if (CronTab.update(job)) {
-        res.redirect('/jobs/' + job._id);
+        res.redirect('jobs/' + job._id);
       } else {
         return next(new Error('Error updating Job'));
       }
@@ -67,7 +71,7 @@ app.delete('/jobs/:id', function(req, res, next) {
     job.remove(function(err2) {
       if (err2) return next(err2);
       if (CronTab.remove(job)) {
-        res.redirect('/jobs');
+        res.redirect('jobs');
       } else {
         return next(new Error('Error removing job'));
       }

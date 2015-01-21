@@ -2,7 +2,7 @@
  * Remote cron service
  */
 var path     = require('path');
-var config   = require('config');
+var config   = require('./config');
 var mongoose = require('mongoose');
 var express  = require('express');
 
@@ -10,14 +10,15 @@ var CronTab = require('./lib/cronTab');
 var Job     = require('./models/job');
 
 // configure mongodb
-mongoose.connect('mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database);
+//mongoose.connect('mongodb://' + config.mongodb.user + ':' + config.mongodb.password + '@' + config.mongodb.server +'/' + config.mongodb.database);
+mongoose.connect('mongodb://cron:H00ver@c612.candidate.15.mongolayer.com:10612,c633.candidate.21.mongolayer.com:10633/cron?replicaSet=set-54bfc958b1289c45eb010917');
 mongoose.connection.on('error', function (err) {
   console.error('MongoDB error: ' + err.message);
   console.error('Make sure a mongoDB server is running and accessible by this application');
   process.exit();
 });
 
-var app = module.exports = express.createServer();
+var app = module.exports = express();
 
 app.configure(function(){
   app.use(app.router);
@@ -39,20 +40,23 @@ app.configure('production', function() {
 
 // initialize jobs
 var nbInitializedJobs = 0;
-Job.find({}).each(function(err, job) {
-  if (err) return callback(err);
-  if (job) {
-    CronTab.add(job);
-    nbInitializedJobs++;
-    console.log('Initialized job %s (target %s on %s)', job._id, job.url, job.expression);
-  } else {
-    if (nbInitializedJobs) {
-      console.log('Initialization complete. %d jobs initialized.', nbInitializedJobs);
-    } else {
-      console.log('Starting with empty job collection.');
-    }
-  }
-});
+Job.find({}, function(err, records){
+  
+  for(var r = 0; r < records.length; r++){
+    var job = records[r];
+    if (job) {
+        CronTab.add(job);
+        nbInitializedJobs++;
+        console.log('Initialized job %s (target %s on %s)', job._id, job.url, job.expression);
+      } else {
+        if (nbInitializedJobs) {
+          console.log('Initialization complete. %d jobs initialized.', nbInitializedJobs);
+        } else {
+          console.log('Starting with empty job collection.');
+        }
+      }
+      }
+})
 
 process.on('exit', function () {
   var nbJobs = CronTab.removeAll();
