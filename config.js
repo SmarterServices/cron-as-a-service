@@ -1,3 +1,5 @@
+//export NODE_ENV=jason
+
 config = {};
 
 config.mongodb = {
@@ -7,7 +9,7 @@ config.mongodb = {
 	  password:	'Te3T1me$'
 };
 
-config.server = {port: 8200};
+config.server = {port: 80};
 
 config.verbose = true;
 
@@ -18,6 +20,10 @@ config.loggly = {
       username: 'jason',
       password: 'decade'
     }
+}
+
+if(process.env.NODE_ENV == 'jason'){
+	config.server.port = 8200;
 }
 
  
