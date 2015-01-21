@@ -2,6 +2,8 @@
  * Module dependencies.
  */
 var express    = require('express');
+var cron_parser = require('cron-parser');
+var moment = require('moment');
 var app = module.exports = express.createServer();
 var Job = require('../../models/job');
 var CronTab = require('../../lib/cronTab');
@@ -43,6 +45,10 @@ app.post('/jobs', function(req, res, next) {
 app.get('/jobs/:id', function(req, res, next) {
   Job.findOne({ _id: req.params.id }, function(err, job) {
     if (err) return next(err);
+    var interval = cron_parser.parseExpression(job.expression);
+    // add the next run to the output...
+    job.setValue('next_run', moment(interval.next()).unix());
+
     res.json(job);
   });
 });
@@ -51,12 +57,31 @@ app.put('/jobs/:id', function(req, res, next) {
   Job.findOne({ _id: req.params.id }, function(err, job) {
     if (err) return next(err);
     if (!job) return next(new Error('Trying to update non-existing job'), 403);
-    job.expression = req.params.expression;
-    job.url = req.parms.url;
+    
+    if(req.body.expression)
+      job.expression = req.body.expression;
+    if(req.body.url)
+      job.url = req.body.url;
+    if(req.body.name)
+      job.name = req.body.name;
+    if(req.body.details)
+      job.details =  req.body.details;
+    if(req.body.service_name)
+      job.service_name = req.body.service_name;
+    if(req.body.customer_id)
+      job.customer_id = req.body.customer_id;
+
     job.save(function(err2) {
       if (err2) return next(err2);
       if (CronTab.update(job)) {
-        res.redirect('jobs/' + job._id);
+        
+         var interval = cron_parser.parseExpression(job.expression);
+        // add the next run to the output...
+        job.setValue('next_run', moment(interval.next()).unix());
+
+        res.json(job);
+
+        
       } else {
         return next(new Error('Error updating Job'));
       }

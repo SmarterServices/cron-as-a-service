@@ -11,7 +11,9 @@
     "config":   "latest",
     "async":    "latest",
     "cron":     "latest",
-    "loggly": "latest"
+    "loggly": "latest",
+    "cron-parser": "latest",
+    "moment": "latest"
   },
   "keywords": ["cron", "service"],
   "repository": "https://github.com/fzaninotto/cron-as-a-service",
