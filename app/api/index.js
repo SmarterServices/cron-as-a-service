@@ -15,6 +15,21 @@ app.configure(function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
+app.post('/check-expression', function(req, res, next) {
+  if (!req.body.expression) return next(new Error('You must provide an expression as POST parameters'), 403);
+  
+  var results = [];
+
+  var interval = cron_parser.parseExpression(req.body.expression);
+
+  for(var l = 0; l < 5; l++){
+    results.push(interval.next());
+  }
+
+  res.json(results);
+
+});
+
 app.get('/jobs', function(req, res, next) {
   Job.find(function(err, jobs) {
     if (err) return next(err);
@@ -47,7 +62,14 @@ app.get('/jobs/:id', function(req, res, next) {
     if (err) return next(err);
     var interval = cron_parser.parseExpression(job.expression);
     // add the next run to the output...
-    job.setValue('next_run', moment(interval.next()).unix());
+    
+    var upcoming_runs = [];
+
+    for(var l = 0; l < 5; l++){
+      upcoming_runs.push(interval.next());
+    }
+
+    job.setValue('upcoming_runs', upcoming_runs);
 
     res.json(job);
   });
@@ -77,7 +99,14 @@ app.put('/jobs/:id', function(req, res, next) {
         
          var interval = cron_parser.parseExpression(job.expression);
         // add the next run to the output...
-        job.setValue('next_run', moment(interval.next()).unix());
+          var upcoming_runs = [];
+
+          for(var l = 0; l < 5; l++){
+            upcoming_runs.push(interval.next());
+          }
+
+          job.setValue('upcoming_runs', upcoming_runs);
+
 
         res.json(job);
 
