@@ -23,7 +23,8 @@ app.post('/check-expression', function(req, res, next) {
   var interval = cron_parser.parseExpression(req.body.expression);
 
   for(var l = 0; l < 5; l++){
-    results.push(interval.next());
+    var next = interval.next();
+    results.push({iso: next, unix: moment(next).unix()});
   }
 
   res.json(results);
@@ -66,7 +67,8 @@ app.get('/jobs/:id', function(req, res, next) {
     var upcoming_runs = [];
 
     for(var l = 0; l < 5; l++){
-      upcoming_runs.push(interval.next());
+      var next = interval.next();
+      upcoming_runs.push({iso: next, unix: moment(next).unix()});
     }
 
     job.setValue('upcoming_runs', upcoming_runs);
