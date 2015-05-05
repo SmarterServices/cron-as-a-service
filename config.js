@@ -9,7 +9,7 @@ config.mongodb = {
 	  password:	'Te3T1me$'
 };
 
-config.server = {port: 80};
+config.server = {port: 81};
 
 config.verbose = true;
 
