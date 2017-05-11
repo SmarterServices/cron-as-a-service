@@ -2,7 +2,7 @@ mongodb:
   server:   c612.candidate.15.mongolayer.com:10612,c633.candidate.21.mongolayer.com:10633/cron?replicaSet=set-54bfc958b1289c45eb010917
   database: cron
   user:     smarterservices 
-  password:	Te3T1me$
+  password:	
 
 server:
   port:     8200
